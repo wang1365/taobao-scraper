@@ -11,17 +11,17 @@ async def run():
         'executablePath': './chrome-win/chrome.exe',
         'headless': False,
         # 设置Windows-size和Viewport大小来实现网页完整显示
-        'args': ['--no-sandbox', '--window-size=1024,1000', '--disable-infobars']
+        'args': ['--no-sandbox', '--window-size=1024,600', '--disable-infobars']
     }, devtools=True)
     page = await browser.newPage()
 
 
-    await page.evaluateOnNewDocument('''()=>{ Object.defineProperties(navigator,{ 'webdriver':{ get: ()=> false } }) }''')
-    await page.evaluateOnNewDocument('''()=>{ Object.defineProperties(navigator,{ 'languages':{ get: ()=> ['en-us', 'en'] } })}''')
-    await page.evaluateOnNewDocument('''() => {Object.defineProperties(navigator, {'plugins': {get: () => [1, 2, 3, 4, 5]}})}''')
+    # await page.evaluateOnNewDocument('''()=>{ Object.defineProperties(navigator,{ 'webdriver':{ get: ()=> false } }) }''')
+    # await page.evaluateOnNewDocument('''()=>{ Object.defineProperties(navigator,{ 'languages':{ get: ()=> ['en-us', 'en'] } })}''')
+    # await page.evaluateOnNewDocument('''() => {Object.defineProperties(navigator, {'plugins': {get: () => [1, 2, 3, 4, 5]}})}''')
     # 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     # await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36')
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+    # await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
     # 定义监听器，拦截并处理请求
     async def handle_request(req):
         print('==>', req.resourceType, req.url)
