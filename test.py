@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import requests
 
 import pyppeteer as pt
 from pyppeteer.network_manager import Request
@@ -8,7 +9,17 @@ from pyppeteer.network_manager import Request
 # 定义保存的文件路径
 cookies_file = './user_data/cookies.json'
 localstorage_file = './user_data/localstorage.json'
-ids = ['692747434364']
+ids = ['692747434364',
+'737538057374',
+'736436305725',
+'820262700721',
+'769269832959',
+'817085314751',
+'734421092543',
+'728560310370',
+'711244172250',]
+
+
 # urls = ['https://item.taobao.com/item.htm?id=692747434364']
 
 async def save_login_data(page):
@@ -53,6 +64,27 @@ def save_to_cache(data, id):
     print(f'Save to cache:', fp)
     with open(fp, 'w', encoding='utf-8') as f:
         f.write(data)
+
+    image_dir = f'./out/cache/{id}_images'
+    json_data = json.loads(data)
+    images = json_data['data']['item']['images']
+    for i, img in enumerate(images):
+        print(f'Save image:', img)
+        response = requests.get(img, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/'
+        })
+        # 检查请求是否成功
+        if response.status_code == 200:
+            # 打开一个文件用于写入，并设置为二进制写模式
+            image_path = f'{image_dir}/{id}-{i + 1}.jpg'
+            if not os.path.exists(image_path):
+                os.makedirs(image_dir, exist_ok=True)
+            with open(image_path, 'wb') as f:
+                # 写入获取到的数据
+                f.write(response.content)
+            print(f"图片已下载并保存到 {image_path}")
+        else:
+            print("图片下载失败")
 
 
 def load_from_cache(id):

@@ -1,2 +1,3 @@
 # https://github.com/pyppeteer/pyppeteer
 pyppeteer
+requests
