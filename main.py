@@ -2,6 +2,7 @@ import asyncio
 from time import sleep
 
 import pyppeteer as pt
+from pyppeteer.network_manager import Request
 
 urls = ['https://item.taobao.com/item.htm?id=692747434364']
 
@@ -15,7 +16,6 @@ async def run():
     }, devtools=True)
     page = await browser.newPage()
 
-
     # await page.evaluateOnNewDocument('''()=>{ Object.defineProperties(navigator,{ 'webdriver':{ get: ()=> false } }) }''')
     # await page.evaluateOnNewDocument('''()=>{ Object.defineProperties(navigator,{ 'languages':{ get: ()=> ['en-us', 'en'] } })}''')
     # await page.evaluateOnNewDocument('''() => {Object.defineProperties(navigator, {'plugins': {get: () => [1, 2, 3, 4, 5]}})}''')
@@ -23,13 +23,15 @@ async def run():
     # await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36')
     # await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
     # 定义监听器，拦截并处理请求
-    async def handle_request(req):
-        print('==>', req.resourceType, req.url)
+    async def handle_request(req: Request):
+        # if req.resourceType not in ['document', 'image', 'script', 'stylesheet']:
+        #     print('==>', req.resourceType, req.url)
         await req.continue_()
 
     async def handle_response(response):
-        # print(response.text())
+        # print('<==', response.url)
         pass
+
     # 启用请求拦截功能
     await page.setRequestInterception(True)
     # 监听网络响应
@@ -44,13 +46,17 @@ async def run():
     #    }
     #    """)
     # 监听请求事件
-    # page.on('request', lambda req: asyncio.ensure_future(handle_request(req)))
-    # page.on('response', lambda res: asyncio.ensure_future(handle_response(res)))
+    page.on('request', lambda req: asyncio.ensure_future(handle_request(req)))
+    page.on('response', lambda res: asyncio.ensure_future(handle_response(res)))
     await page.goto(urls[0])
 
     # await browser.close()
     await asyncio.sleep(500)
     sleep(10000)
+
+async def fetch_product(id, page):
+    url = f'https://item.taobao.com/item.htm?id={id}'
+    await page.goto(url)
 
 
 if __name__ == '__main__':
@@ -65,5 +71,5 @@ if __name__ == '__main__':
     # https://npm.taobao.org/mirrors/chromium-browser-snapshots
     # 选择对应系统和对应的版本（我这里是mac系统，选择了我系统默认的588429）
 
-    ev = asyncio.get_event_loop()
+    ev = asyncio.new_event_loop()
     ev.run_until_complete(run())
