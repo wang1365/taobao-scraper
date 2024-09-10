@@ -9,8 +9,10 @@ from pyppeteer.network_manager import Request
 from app.ajax_handler import on_response
 from app.auth import load_login_data
 from app.cache import save_to_cache, load_from_cache
+from app.dingtalk import send_dingtalk
 from app.store import Store
-import  product
+import product
+
 
 # urls = ['https://item.taobao.com/item.htm?id=692747434364']
 
@@ -76,7 +78,6 @@ async def init_page():
     return page
 
 
-
 async def run():
     page = await init_page()
     # load login data
@@ -85,33 +86,25 @@ async def run():
     with open('./out/data/products.txt', 'r', encoding='utf-8') as f:
         product_urls = f.readlines()
 
+    # 遍历商品进行抓取
     for url in product_urls:
         product_id = product.parse_id(url)
         if product.exist(product_id):
             print('Load from cache:', product_id)
             continue
 
+        # 跳转到商品详情页
         print('Start load product detail page:', product_id)
         await page.goto(url)
-        await asyncio.sleep(5)
-        # print(await page.content())
-        # await page.screenshot({'path': f'./out/screenshots/{url.split("?")[0].split("/")[-1]}.png'})
 
-    # for id in ids:
-    #     data = load_from_cache(id)
-    #     if data:
-    #         print('Load from cache:', id)
-    #         continue
-    #     await asyncio.sleep(1)
-    #     await fetch_product(id, page)
+        # 等待页面加载完成，
+        await asyncio.sleep(5)
+        if not page.url.startswith('https://item.taobao.com'):
+            # 如果页面跳转了，说明可能触发了机制，需要通知人工介入
+            send_dingtalk(f'Error: {product_id} prevented')
 
     # await browser.close()
     await asyncio.sleep(500)
-
-
-async def fetch_product(id, page):
-    url = f'https://item.taobao.com/item.htm?id={id}'
-    await page.goto(url)
 
 
 if __name__ == '__main__':
