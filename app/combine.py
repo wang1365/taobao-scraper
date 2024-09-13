@@ -16,9 +16,13 @@ def init_excel():
 
     columns = ['Shop Id', 'Shop Name',
                'Product Id', 'Product Name', 'Product Link',
+               'SKU',
                'Seller ID', 'Seller Name',
                'Product Params', 'Images', ]
     ws.append(columns)
+
+    # 冻结首行
+    ws.freeze_panes = "A2"
 
     # 创建字体对象
     font = Font(bold=True, color="FF0000", size=12, name='Arial')
@@ -35,6 +39,8 @@ def init_excel():
     ws.column_dimensions[_()].width = 15  # PRODUCT ID
     ws.column_dimensions[_()].width = 60  # PRODUCT NAME
     ws.column_dimensions[_()].width = 50  # PRODUCT NAME
+
+    ws.column_dimensions[_()].width = 50  # sku
 
     ws.column_dimensions[_()].width = 12  # SELLER ID
     ws.column_dimensions[_()].width = 15  # SELLER NAME
@@ -67,10 +73,20 @@ if __name__ == '__main__':
                 filter(lambda info: info['type'] == 'BASE_PROPS', data['componentsVO']['extensionInfoVO']['infos']))
             params = infos[0]['items'] if len(infos) > 0 else ''
 
-            products.append([shopId, shopName,
-                             item_id, title, product_link,
-                             seller_id, sellerNick,
-                             str(params), str(images)])
+            if 'props' in data['skuBase']:
+                sku = [{
+                    'name': t['name'],
+                    'values': [_['name'] for _ in t['values']]
+                }
+                    for t in data['skuBase']['props']]
+
+                products.append([shopId, shopName,
+                                 item_id, title, product_link,
+                                 str(sku),
+                                 seller_id, sellerNick,
+                                 str(params), str(images)])
+            else:
+                sku = ''
 
     # 按照shop id排序
     products.sort(key=lambda x: x[0])
