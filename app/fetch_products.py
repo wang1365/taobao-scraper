@@ -1,5 +1,6 @@
 import asyncio
 import json
+import random
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 
@@ -87,7 +88,8 @@ async def run():
         product_urls = f.readlines()
 
     # 遍历商品进行抓取
-    for url in product_urls:
+    for i, url in enumerate(product_urls):
+        print(f'=======================> [{i + 1}/{len(product_urls)}] Start load product detail page:', url)
         product_id = product.parse_id(url)
         if product.exist(product_id):
             print('Load from cache:', product_id)
@@ -98,7 +100,7 @@ async def run():
         await page.goto(url)
 
         # 等待页面加载完成，
-        await asyncio.sleep(5)
+        await asyncio.sleep(random.randint(10, 20))
         if not page.url.startswith('https://item.taobao.com'):
             # 如果页面跳转了，说明可能触发了机制，需要通知人工介入
             send_dingtalk(f'Error: {product_id} prevented')
