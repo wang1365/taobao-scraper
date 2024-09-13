@@ -18,7 +18,7 @@ def init_excel():
                'Product Id', 'Product Name', 'Product Link',
                'SKU',
                'Seller ID', 'Seller Name',
-               'Product Params', 'Images', ]
+               'Product Params', 'Images', 'Videos']
     ws.append(columns)
 
     # 冻结首行
@@ -46,8 +46,8 @@ def init_excel():
     ws.column_dimensions[_()].width = 15  # SELLER NAME
 
     ws.column_dimensions[_()].width = 150  # PRODUCT PARAMS
-    ws.column_dimensions[_()].width = 200  # IMAGES
-    ws.column_dimensions[_()].width = 200  # IMAGES
+    ws.column_dimensions[_()].width = 150  # IMAGES
+    ws.column_dimensions[_()].width = 150  # Video
 
     return wb
 
@@ -63,6 +63,13 @@ if __name__ == '__main__':
             product_link = f'https://item.taobao.com/item.htm?id={item_id}'
             title = data['item']['title']
             images = data['item']['images']
+            if 'videos' in data['item']:
+                videos = []
+                for video in data['item']['videos']:
+                    images.append(video['videoThumbnailURL'])
+                    videos.append(video['url'])
+            else:
+                videos = ''
 
             seller_id = data['seller']['sellerId']
             sellerNick = data['seller']['sellerNick']
@@ -84,7 +91,7 @@ if __name__ == '__main__':
                                  item_id, title, product_link,
                                  str(sku),
                                  seller_id, sellerNick,
-                                 str(params), str(images)])
+                                 str(params), str(images), str(videos)])
             else:
                 sku = ''
 
