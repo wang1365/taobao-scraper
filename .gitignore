@@ -162,3 +162,5 @@ cython_debug/
 #.idea/
 
 chrome-win/
+app/user_data/
+app/out/
