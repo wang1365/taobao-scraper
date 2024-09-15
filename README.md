@@ -19,6 +19,4 @@ A simple and useful script to scrape products in `taobao.com`
 
 
 ## Demo
-<video controls>
-  <source src="https://youtu.be/Rn4hkuVg-gk" type="video/mp4">
-</video>
+[![IMAGE ALT TEXT HERE](https://i9.ytimg.com/vi_webp/Rn4hkuVg-gk/mq3.webp?sqp=CKCMnbcG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGF0gXShdMA8=&rs=AOn4CLD2rOBpS7EaY78jNISrjIXha1Wo-A)](https://youtu.be/Rn4hkuVg-gk)
