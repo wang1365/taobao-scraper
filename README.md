@@ -20,3 +20,10 @@ A simple and useful script to scrape products in `taobao.com`
 
 ## Demo
 [![IMAGE ALT TEXT HERE](https://i9.ytimg.com/vi_webp/Rn4hkuVg-gk/mq3.webp?sqp=CKCMnbcG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGF0gXShdMA8=&rs=AOn4CLD2rOBpS7EaY78jNISrjIXha1Wo-A)](https://youtu.be/Rn4hkuVg-gk)
+[![Watch the video](https://i9.ytimg.com/vi_webp/Rn4hkuVg-gk/mq3.webp?sqp=CKCMnbcG-oaymwEmCMACELQB8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGF0gXShdMA8=&rs=AOn4CLD2rOBpS7EaY78jNISrjIXha1Wo-A)](https://youtu.be/Rn4hkuVg-gk)
+<video width="630" height="300" src="https://github.com/user-attachments/assets/1fc0c23a-f02b-48db-ad74-b3c5379c798"></video>
+
+https://github.com/user-attachments/assets/1fc0c23a-f02b-48db-ad74-b3c5379c7981
+
+https://github.com/user-attachments/assets/1fc0c23a-f02b-48db-ad74-b3c5379c7981
+
