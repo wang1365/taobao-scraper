@@ -16,3 +16,9 @@ A simple and useful script to scrape products in `taobao.com`
 - [ ] Download images
 - [x] Extract and combine to a excel file
 - [x] Dingtalk notification integration
+
+
+## Demo
+<video controls>
+  <source src="https://youtu.be/Rn4hkuVg-gk" type="video/mp4">
+</video>
