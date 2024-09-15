@@ -14,7 +14,7 @@ def init_excel():
     # 给工作表命名
     ws.title = "taobao"
 
-    columns = ['Shop Id', 'Shop Name',
+    columns = ['Shop Id', 'Shop Name', 'Origin Price', 'Extra Price',
                'Product Id', 'Product Name', 'Product Link',
                'SKU',
                'Seller ID', 'Seller Name',
@@ -25,7 +25,7 @@ def init_excel():
     ws.freeze_panes = "A2"
 
     # 创建字体对象
-    font = Font(bold=True, color="FF0000", size=12, name='Arial')
+    font = Font(bold=True, color="FF0000", size=11, name='Arial')
 
     # 应用字体样式到单元格
     for i in range(len(columns)):
@@ -35,6 +35,8 @@ def init_excel():
     _ = lambda: chr(ord('A') + next(counter))
     ws.column_dimensions[_()].width = 12  # SHOP ID
     ws.column_dimensions[_()].width = 20  # SHOP NAME
+    ws.column_dimensions[_()].width = 11  # ORIGIN PRICE
+    ws.column_dimensions[_()].width = 11  # extra price
 
     ws.column_dimensions[_()].width = 15  # PRODUCT ID
     ws.column_dimensions[_()].width = 60  # PRODUCT NAME
@@ -61,6 +63,13 @@ if __name__ == '__main__':
             data = json.load(f)['data']
             item_id = data['item']['itemId']
             product_link = f'https://item.taobao.com/item.htm?id={item_id}'
+
+            priceVo = data['componentsVO']['priceVO']
+            origin_price = data['componentsVO']['priceVO']['price']['priceText']
+            if 'extraPrice' in data['componentsVO']['priceVO']:
+                extra_price = priceVo['extraPrice']['priceText']
+            else:
+                extra_price = ''
             title = data['item']['title']
             images = data['item']['images']
             if 'videos' in data['item']:
@@ -87,7 +96,7 @@ if __name__ == '__main__':
                 }
                     for t in data['skuBase']['props']]
 
-                products.append([shopId, shopName,
+                products.append([shopId, shopName, origin_price, extra_price,
                                  item_id, title, product_link,
                                  str(sku),
                                  seller_id, sellerNick,
