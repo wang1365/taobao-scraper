@@ -16,6 +16,7 @@ def init_excel():
 
     columns = ['Shop Id', 'Shop Name', 'Origin Price', 'Extra Price',
                'Product Id', 'Product Name', 'Product Link',
+               'Inventory Total', 'Inventory Detail',
                'SKU',
                'Seller ID', 'Seller Name',
                'Product Params', 'Images', 'Videos']
@@ -42,7 +43,9 @@ def init_excel():
     ws.column_dimensions[_()].width = 60  # PRODUCT NAME
     ws.column_dimensions[_()].width = 50  # PRODUCT NAME
 
-    ws.column_dimensions[_()].width = 50  # sku
+    ws.column_dimensions[_()].width = 15  # INVENTORY TOTAL
+    ws.column_dimensions[_()].width = 25  # INVENTORY DETAIL
+    ws.column_dimensions[_()].width = 25  # sku
 
     ws.column_dimensions[_()].width = 12  # SELLER ID
     ws.column_dimensions[_()].width = 15  # SELLER NAME
@@ -52,6 +55,91 @@ def init_excel():
     ws.column_dimensions[_()].width = 150  # Video
 
     return wb
+
+
+def get_inventory(data):
+    """
+    "skus": [{
+                    "propPath": "1627207:628420314;20509:28314",
+                    "skuId": "4908138313350"
+                }]
+    :param data:
+    :return:
+    """
+    skus = data['skuBase']['skus']
+    '''
+    { 
+         "4908138313350": {
+             "1627207": "628420314",
+             "20509": "28314",
+         } 
+     }
+    '''
+    sku_map = {k['skuId']: k['propPath'] for k in skus}
+    for k, v in sku_map.items():
+        sku = v
+        sku = sku.split(';')
+        sku_map[k] = [_.split(':')[1] for _ in sku]
+
+    '''
+    "props": [{
+                    "comboProperty": "false",
+                    "hasImage": "true",
+                    "name": "颜色分类",
+                    "nameDesc": "（4）",
+                    "pid": "1627207",
+                    "values": [{
+                            "comboPropertyValue": "false",
+                            "image": "https://gw.alicdn.com/bao/uploaded/i3/2212252545501/O1CN01FYU7Lq1qVVXr7dAcX_!!2212252545501.jpg",
+                            "name": "锡器灰 现货",
+                            "sortOrder": "7",
+                            "vid": "628420314"
+                        }
+    '''
+    if 'props' not in data['skuBase']:
+        return data['skuCore']['sku2info']['0']['quantity'] + data['skuCore']['sku2info']['0']['quantityText'], ''
+    props_json = data['skuBase']['props']
+    props = {}
+    for pid in props_json:
+        props[pid['pid']] = pid['name']
+        for value in pid['values']:
+            props[value['vid']] = value['name']
+
+    '''
+    "skuCore": {
+            "sku2info": {
+                "0": {
+                    "logisticsTime": "48小时内发货，预计明天送达",
+                    "moreQuantity": "false",
+                    "price": {
+                        "priceMoney": "179820",
+                        "priceText": "1798.2"
+                    },
+                    "quantity": "17",
+                    "quantityDisplayValue": "1",
+                    "quantityText": "有货",
+                    "subPrice": {
+                        "priceBgColor": "#FF5000",
+                        "priceColor": "#FFFFFF",
+                        "priceMoney": "159520",
+                        "priceText": "1595.2",
+                        "priceTitle": "券后",
+                        "priceTitleColor": "#FFFFFF"
+                    }
+                },
+                "4908138313351": {
+    '''
+    inventory_info = data['skuCore']['sku2info']
+
+    inventory_total = inventory_info['0']['quantity'] + ' ' + inventory_info['0']['quantityText']
+    inventory_detail = ''
+    for sku_id, detail in inventory_info.items():
+        properties = sku_map.get(sku_id)
+        if not properties:
+            continue
+        prop_names = ' '.join([props.get(v) for v in properties])
+        inventory_detail += f'{prop_names} {detail["quantity"]} {detail["quantityText"]} | '
+    return inventory_total, inventory_detail.strip(' | ')
 
 
 if __name__ == '__main__':
@@ -80,6 +168,8 @@ if __name__ == '__main__':
             else:
                 videos = ''
 
+            inventory_total, inventory_detail = get_inventory(data)
+
             seller_id = data['seller']['sellerId']
             sellerNick = data['seller']['sellerNick']
             shopId = data['seller']['shopId']
@@ -98,7 +188,7 @@ if __name__ == '__main__':
 
                 products.append([shopId, shopName, origin_price, extra_price,
                                  item_id, title, product_link,
-                                 str(sku),
+                                 inventory_total, inventory_detail, str(sku),
                                  seller_id, sellerNick,
                                  str(params), str(images), str(videos)])
             else:
