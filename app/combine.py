@@ -17,7 +17,7 @@ def init_excel():
     columns = ['Shop Id', 'Shop Name', 'Origin Price', 'Extra Price',
                'Product Id', 'Product Name', 'Product Link',
                'Inventory Total', 'Inventory Detail',
-               'SKU',
+               'SKU', 'Sku Picture',
                'Seller ID', 'Seller Name',
                'Product Params', 'Images', 'Videos']
     ws.append(columns)
@@ -46,6 +46,7 @@ def init_excel():
     ws.column_dimensions[_()].width = 15  # INVENTORY TOTAL
     ws.column_dimensions[_()].width = 25  # INVENTORY DETAIL
     ws.column_dimensions[_()].width = 25  # sku
+    ws.column_dimensions[_()].width = 25  # sku picture
 
     ws.column_dimensions[_()].width = 12  # SELLER ID
     ws.column_dimensions[_()].width = 15  # SELLER NAME
@@ -152,14 +153,20 @@ if __name__ == '__main__':
             item_id = data['item']['itemId']
             product_link = f'https://item.taobao.com/item.htm?id={item_id}'
 
+            # 商品价格
             priceVo = data['componentsVO']['priceVO']
             origin_price = data['componentsVO']['priceVO']['price']['priceText']
             if 'extraPrice' in data['componentsVO']['priceVO']:
                 extra_price = priceVo['extraPrice']['priceText']
             else:
                 extra_price = ''
+
+            # 商品名称
             title = data['item']['title']
+
+            # 商品图片
             images = data['item']['images']
+            # 商品视频 以及商品视频缩略图
             if 'videos' in data['item']:
                 videos = []
                 for video in data['item']['videos']:
@@ -167,11 +174,14 @@ if __name__ == '__main__':
                     videos.append(video['url'])
             else:
                 videos = ''
-
+            # 商品库存
             inventory_total, inventory_detail = get_inventory(data)
 
+            # 商家信息
             seller_id = data['seller']['sellerId']
             sellerNick = data['seller']['sellerNick']
+
+            # 店铺信息
             shopId = data['seller']['shopId']
             shopName = data['seller']['shopName']
 
@@ -186,13 +196,20 @@ if __name__ == '__main__':
                 }
                     for t in data['skuBase']['props']]
 
-                products.append([shopId, shopName, origin_price, extra_price,
-                                 item_id, title, product_link,
-                                 inventory_total, inventory_detail, str(sku),
-                                 seller_id, sellerNick,
-                                 str(params), str(images), str(videos)])
+                sku_image = {}
+                for t in data['skuBase']['props']:
+                    for v in t['values']:
+                        if 'image' in v:
+                            sku_image[v['name']] = v['image']
             else:
-                sku = ''
+                print('No sku, skip', item_id, data)
+                continue
+
+            products.append([shopId, shopName, origin_price, extra_price,
+                             item_id, title, product_link,
+                             inventory_total, inventory_detail, str(sku), str(sku_image),
+                             seller_id, sellerNick,
+                             str(params), str(images), str(videos)])
 
     # 按照shop id排序
     products.sort(key=lambda x: x[0])
