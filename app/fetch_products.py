@@ -114,6 +114,22 @@ async def run():
             # 如果页面跳转了，说明可能触发了机制，需要通知人工介入
             send_dingtalk(f'Error: {product_id} prevented')
 
+        await page.evaluate('''async () => {
+              await new Promise((resolve, reject) => {
+                var totalHeight = 0;
+                var distance = 100;
+                var timer = setInterval(() => {
+                  var scrollHeight = 2000;
+                  window.scrollBy(0, distance);
+                  totalHeight += distance;
+                  if (totalHeight >= scrollHeight) {
+                    clearInterval(timer);
+                    resolve();
+                  }
+                }, 100);
+              });
+            }''')
+
     # await browser.close()
     await asyncio.sleep(500)
 
