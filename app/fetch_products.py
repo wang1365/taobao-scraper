@@ -29,6 +29,15 @@ def on_response(url, text):
         product_id = data['data']['item']['itemId']
         product.save(product_id, text)
 
+    # 商品详情 - 描述API
+    if 'mtop.taobao.detail.getdesc' in url:
+        parsed_url = urlparse(url)
+        qs = parse_qs(parsed_url.query)
+        product_id = json.loads(qs['data'][0])['id']
+
+        text = text.lstrip(' mtopjsonp2(').rstrip(')')
+        product.save_desc(product_id, text)
+
 
 async def init_page():
     browser = await pt.launch({
