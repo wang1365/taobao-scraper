@@ -61,7 +61,7 @@ def init_excel():
 def get_inventory(data):
     """
     "skus": [{
-                    "propPath": "1627207:628420314;20509:28314",
+                    "propPath": "1627207:628420314;20509:28314", // "pid_a: vid_a1; pid_b: vid_b1"
                     "skuId": "4908138313350"
                 }]
     :param data:
@@ -74,6 +74,10 @@ def get_inventory(data):
              "1627207": "628420314",
              "20509": "28314",
          } 
+         sku: {
+            pid:vid,
+            pid2:vid
+         }
      }
     '''
     sku_map = {k['skuId']: k['propPath'] for k in skus}
@@ -101,10 +105,13 @@ def get_inventory(data):
         return data['skuCore']['sku2info']['0']['quantity'] + data['skuCore']['sku2info']['0']['quantityText'], ''
     props_json = data['skuBase']['props']
     props = {}
+    # vid对应的图片
+    vid_images = {}
     for pid in props_json:
         props[pid['pid']] = pid['name']
         for value in pid['values']:
             props[value['vid']] = value['name']
+            vid_images[value['vid']] = value.get('image')
 
     '''
     "skuCore": {
@@ -133,14 +140,20 @@ def get_inventory(data):
     inventory_info = data['skuCore']['sku2info']
 
     inventory_total = inventory_info['0']['quantity'] + ' ' + inventory_info['0']['quantityText']
-    inventory_detail = ''
+    inventory_detail = []
     for sku_id, detail in inventory_info.items():
-        properties = sku_map.get(sku_id)
-        if not properties:
+        vids = sku_map.get(sku_id)
+        if not vids:
             continue
-        prop_names = ' '.join([props.get(v) for v in properties])
-        inventory_detail += f'{prop_names} {detail["quantity"]} {detail["quantityText"]} | '
-    return inventory_total, inventory_detail.strip(' | ')
+        prop_names = [props.get(v) for v in vids]
+        sku_images = list(filter(lambda x: x is not None, [vid_images.get(vid) for vid in vids]))
+        quantity = detail['quantity']
+        inventory_detail.append({
+            'options': prop_names,
+            'image_url': sku_images[0] if sku_images else '',
+            'quantity': int(quantity)
+        })
+    return inventory_total, sorted(inventory_detail, key=lambda x: x['options'])
 
 
 if __name__ == '__main__':
@@ -207,7 +220,7 @@ if __name__ == '__main__':
 
             products.append([shopId, shopName, origin_price, extra_price,
                              item_id, title, product_link,
-                             inventory_total, inventory_detail, str(sku), str(sku_image),
+                             inventory_total, str(inventory_detail), str(sku), str(sku_image),
                              seller_id, sellerNick,
                              str(params), str(images), str(videos)])
 

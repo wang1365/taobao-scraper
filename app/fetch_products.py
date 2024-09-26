@@ -107,9 +107,10 @@ async def run():
         # 跳转到商品详情页
         print('Start load product detail page:', product_id)
         await page.goto(url)
+        await page.evaluate('''() => { Object.defineProperties(navigator, {webdriver: { get: () => false }}) }''')
 
         # 等待页面加载完成，
-        await asyncio.sleep(random.randint(10, 20))
+        await asyncio.sleep(random.randint(1, 5))
         if not page.url.startswith('https://item.taobao.com'):
             # 如果页面跳转了，说明可能触发了机制，需要通知人工介入
             send_dingtalk(f'Error: {product_id} prevented')
@@ -129,7 +130,7 @@ async def run():
                 }, 100);
               });
             }''')
-
+        await asyncio.sleep(random.randint(10, 20))
     # await browser.close()
     await asyncio.sleep(500)
 
