@@ -2,17 +2,20 @@ import os
 from urllib.parse import urlparse, parse_qs
 
 
+# base_dir = './out/data/items'
+base_dir = './out/data_0926/items'
+
 def exist(product_id):
-    return os.path.exists(f'./out/data/items/{product_id}.json')
+    return os.path.exists(f'{base_dir}/{product_id}.json')
 
 
 def save(product_id, data):
-    with open(f'./out/data/items/{product_id}.json', 'w', encoding='utf-8') as f:
+    with open(f'{base_dir}/{product_id}.json', 'w', encoding='utf-8') as f:
         f.write(data)
 
 
 def save_desc(product_id, data):
-    with open(f'./out/data/items/{product_id}_desc.json', 'w', encoding='utf-8') as f:
+    with open(f'{base_dir}/{product_id}_desc.json', 'w', encoding='utf-8') as f:
         f.write(data)
 
 

@@ -7,12 +7,10 @@ from urllib.parse import urlparse, parse_qs
 import pyppeteer as pt
 from pyppeteer.network_manager import Request
 
+import product
 from app.ajax_handler import on_response
 from app.auth import load_login_data
-from app.cache import save_to_cache, load_from_cache
 from app.dingtalk import send_dingtalk
-from app.store import Store
-import product
 
 
 # urls = ['https://item.taobao.com/item.htm?id=692747434364']
