@@ -119,7 +119,7 @@ async def run():
                 var totalHeight = 0;
                 var distance = 100;
                 var timer = setInterval(() => {
-                  var scrollHeight = 2000;
+                  var scrollHeight = 3000;
                   window.scrollBy(0, distance);
                   totalHeight += distance;
                   if (totalHeight >= scrollHeight) {
