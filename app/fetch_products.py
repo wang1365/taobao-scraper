@@ -15,6 +15,7 @@ from app.dingtalk import send_dingtalk
 
 # urls = ['https://item.taobao.com/item.htm?id=692747434364']
 
+# 爬虫检测 https://bot.sannysoft.com/
 
 def on_response(url, text):
     print(f'{datetime.now()} Response: {url} Status: {text}')
@@ -44,17 +45,17 @@ async def init_page():
         # 设置Windows-size和Viewport大小来实现网页完整显示
         'args': [
             '--no-sandbox',
-            '--window-size=1920,1000',
+            '--window-size=1220,900',
             '--disable-infobars',
             '--disable-blink-features=AutomationControlled',
             '--disable-dev-shm-usage',
-            '--disable-gpu'
+            # '--disable-gpu'
         ],
         'ignoreDefaultArgs': ['--enable-automation'],
-    }, devtools=True)
+    }, devtools=False)
     page = await browser.newPage()
     # 设置浏览器窗口大小
-    await page.setViewport(viewport={'width': 1280, 'height': 900})
+    await page.setViewport(viewport={'width': 1220, 'height': 900})
     await page.setUserAgent(
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
     await page.setExtraHTTPHeaders({
@@ -128,7 +129,7 @@ async def run():
                 }, 100);
               });
             }''')
-        await asyncio.sleep(random.randint(20, 30))
+        await asyncio.sleep(random.randint(20, 60))
     # await browser.close()
     await asyncio.sleep(500)
 
