@@ -129,8 +129,10 @@ async def run():
               });
             }''')
 
-        content = page.content()
-        print('==> Html:', content)
+        content = await page.content()
+        if '很抱歉，您查看的宝贝不存' in content:
+            print('==> 商品不存在', product_id)
+            continue
         await asyncio.sleep(random.randint(40, 75))
     # await browser.close()
     await asyncio.sleep(500)
