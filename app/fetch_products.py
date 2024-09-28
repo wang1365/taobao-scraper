@@ -109,10 +109,15 @@ async def run():
         await page.evaluate('''() => { Object.defineProperties(navigator, {webdriver: { get: () => false }}) }''')
 
         # 等待页面加载完成，
-        await asyncio.sleep(random.randint(10, 15))
+        await asyncio.sleep(random.randint(3, 10))
         if not page.url.startswith('https://item.taobao.com'):
             # 如果页面跳转了，说明可能触发了机制，需要通知人工介入
             send_dingtalk(f'Error: {product_id} prevented')
+        content = await page.content()
+        if '很抱歉，您查看的宝贝不存' in content:
+            print('==> 商品不存在', product_id)
+            continue
+
         await page.evaluate('''async () => {
               await new Promise((resolve, reject) => {
                 var totalHeight = 0;
@@ -129,10 +134,7 @@ async def run():
               });
             }''')
 
-        content = await page.content()
-        if '很抱歉，您查看的宝贝不存' in content:
-            print('==> 商品不存在', product_id)
-            continue
+
         await asyncio.sleep(random.randint(40, 75))
     # await browser.close()
     await asyncio.sleep(500)
