@@ -129,7 +129,7 @@ async def run():
                 }, 100);
               });
             }''')
-        await asyncio.sleep(random.randint(20, 45))
+        await asyncio.sleep(random.randint(40, 75))
     # await browser.close()
     await asyncio.sleep(500)
 
