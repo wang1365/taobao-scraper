@@ -103,6 +103,10 @@ async def run():
             print('Load from cache:', product_id)
             continue
 
+        if not product.check_exists(product_id):
+            print('Product lost, ignore', product_id)
+            continue
+
         # 跳转到商品详情页
         print('Start load product detail page:', product_id)
         await page.goto(url)
@@ -116,6 +120,7 @@ async def run():
         content = await page.content()
         if '很抱歉，您查看的宝贝不存' in content:
             print('==> 商品不存在', product_id)
+            product.set_not_exists(product_id)
             continue
 
         await page.evaluate('''async () => {
