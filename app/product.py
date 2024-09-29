@@ -15,12 +15,12 @@ def exist(product_id):
 
 
 def save(product_id, data):
-    with open(f'{base_dir}/{base_items_dir}.json', 'w', encoding='utf-8') as f:
+    with open(f'{base_items_dir}/{product_id}.json', 'w', encoding='utf-8') as f:
         f.write(data)
 
 
 def save_desc(product_id, data):
-    with open(f'{base_dir}/{base_items_dir}_desc.json', 'w', encoding='utf-8') as f:
+    with open(f'{base_items_dir}/{product_id}_desc.json', 'w', encoding='utf-8') as f:
         f.write(data)
 
 
