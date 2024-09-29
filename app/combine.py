@@ -1,9 +1,18 @@
 import json
+import os.path
+import re
 
 from openpyxl import Workbook
 from pathlib import Path
 from openpyxl.styles import Font
 import itertools
+import product
+
+
+def dumps(s):
+    if not s:
+        return ''
+    return json.dumps(s, ensure_ascii=False)
 
 
 def init_excel():
@@ -19,7 +28,7 @@ def init_excel():
                'Inventory Total', 'Inventory Detail',
                'SKU', 'Sku Picture',
                'Seller ID', 'Seller Name',
-               'Product Params', 'Images', 'Videos']
+               'Product Params', 'Images', 'Videos', 'Description Images']
     ws.append(columns)
 
     # 冻结首行
@@ -53,9 +62,59 @@ def init_excel():
 
     ws.column_dimensions[_()].width = 150  # PRODUCT PARAMS
     ws.column_dimensions[_()].width = 150  # IMAGES
-    ws.column_dimensions[_()].width = 150  # Video
+    ws.column_dimensions[_()].width = 100  # Video
+    ws.column_dimensions[_()].width = 150  # Detail Images
 
     return wb
+
+
+def get_detail_images(product_id):
+    file = f'{product.base_items_dir}/{product_id}_desc.json'
+    if not os.path.exists(file):
+        return ''
+    result = set()
+    print('Start parse desc images for:', product_id)
+    with open(file, encoding='utf8') as f:
+        f_str = f.read()
+        if not f_str.startswith('{'):
+            f_str = f_str[2:]
+        data = json.loads(f_str)
+
+        if 'components' in data['data']:
+            componentData = data['data']['components']['componentData']
+            if 'desc_richtext_pc' in componentData:
+                text = componentData['desc_richtext_pc']['model']['text']
+                url_pattern1 = r'background="(https?://[^"]+)"'
+                url_pattern2 = r'src="(https://img.[^"]+)"'
+                urls1 = re.findall(url_pattern1, text)
+                urls2 = re.findall(url_pattern2, text)
+
+                """
+                src=\"https://img.alicdn.com/imgextra/i4/432776619/O1CN01MmGgvq1ylYKTrKA1c_!!432776619.jpg\"
+                """
+
+                for url in urls1:
+                    result.add(url)
+                for url in urls2:
+                    result.add(url)
+
+            for k, v in componentData.items():
+                print('========>kv', k, v)
+                if 'detail_pic_' not in k:
+                    continue
+                pic = v['model'].get('picUrl') or ''
+                if not pic.startswith('http'):
+                    pic = f'https:{pic}'
+                if pic:
+                    result.add(pic)
+
+        if 'wdescContent' in data['data']:
+            for page in data['data']['wdescContent']['pages']:
+                url = page.split('>')[1].split('<')[0]
+                result.add(url)
+
+    print('>>>>>> desc images:', product_id, result)
+    return list(result)
 
 
 def get_inventory(data):
@@ -156,7 +215,7 @@ def get_inventory(data):
     return inventory_total, sorted(inventory_detail, key=lambda x: x['options'])
 
 
-if __name__ == '__main__':
+def run():
     wb = init_excel()
 
     products = []
@@ -218,11 +277,15 @@ if __name__ == '__main__':
                 print('No sku, skip', item_id, data)
                 continue
 
+            # description images
+            detail_images = get_detail_images(item_id)
+
             products.append([shopId, shopName, origin_price, extra_price,
                              item_id, title, product_link,
-                             inventory_total, str(inventory_detail), str(sku), str(sku_image),
+                             inventory_total, dumps(inventory_detail), dumps(sku), dumps(sku_image),
                              seller_id, sellerNick,
-                             str(params), str(images), str(videos)])
+                             dumps(params), dumps(images), dumps(videos), dumps(detail_images)
+                             ])
 
     # 按照shop id排序
     products.sort(key=lambda x: x[0])
@@ -230,3 +293,7 @@ if __name__ == '__main__':
         wb.active.append(product)
 
     wb.save('./out/result/taobao.xlsx')
+
+
+if __name__ == '__main__':
+    run()
