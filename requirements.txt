@@ -2,3 +2,5 @@
 pyppeteer
 requests
 openpyxl
+pytesseract
+Pillow

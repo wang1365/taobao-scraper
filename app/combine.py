@@ -7,6 +7,7 @@ from pathlib import Path
 from openpyxl.styles import Font
 import itertools
 import product
+import ocr
 
 
 def dumps(s):
@@ -28,7 +29,8 @@ def init_excel():
                'Inventory Total', 'Inventory Detail',
                'SKU', 'Sku Picture',
                'Seller ID', 'Seller Name',
-               'Product Params', 'Images', 'Videos', 'Description Images']
+               'Product Params', 'Images', 'Videos', 'Description Images',
+               'Image Text']
     ws.append(columns)
 
     # 冻结首行
@@ -63,6 +65,8 @@ def init_excel():
     ws.column_dimensions[_()].width = 150  # PRODUCT PARAMS
     ws.column_dimensions[_()].width = 150  # IMAGES
     ws.column_dimensions[_()].width = 100  # Video
+    ws.column_dimensions[_()].width = 150  # Detail Images
+
     ws.column_dimensions[_()].width = 150  # Detail Images
 
     return wb
@@ -219,7 +223,10 @@ def run():
     wb = init_excel()
 
     products = []
+    i = 0
     for json_file in Path('./out/data').rglob('*.json'):
+        i += 1
+        print(f'[{i}]=====> start parse: {json_file}')
         with open(json_file, 'r', encoding='utf-8') as f:
             data = json.load(f)['data']
             item_id = data['item']['itemId']
@@ -280,11 +287,15 @@ def run():
             # description images
             detail_images = get_detail_images(item_id)
 
+            # Image text
+            image_text = ocr.to_text(detail_images)
+
             products.append([shopId, shopName, origin_price, extra_price,
                              item_id, title, product_link,
                              inventory_total, dumps(inventory_detail), dumps(sku), dumps(sku_image),
                              seller_id, sellerNick,
-                             dumps(params), dumps(images), dumps(videos), dumps(detail_images)
+                             dumps(params), dumps(images), dumps(videos), dumps(detail_images),
+                             dumps(image_text)
                              ])
 
     # 按照shop id排序
