@@ -4,3 +4,4 @@ requests
 openpyxl
 pytesseract
 Pillow
+wechatsogou

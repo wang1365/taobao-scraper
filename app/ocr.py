@@ -9,7 +9,24 @@ import threading
 image_dir = './out/images'
 
 
-def get_image_from_url(url) -> str:
+def save_lost_images(url):
+    with open('./out/lost_images/data.txt', 'a') as f:
+        f.write(url + '\n')
+
+
+def read_lost_images():
+    with open('./out/lost_images/data.txt') as f:
+        s = f.readlines()
+        print(s)
+        return [t.strip('\n') for t in s]
+
+
+lost_images = read_lost_images()
+
+
+def get_image_from_url(product_id, url) -> str:
+    if url in lost_images:
+        return ''
     key = hashlib.md5(url.encode()).hexdigest()
     image_path = f'{image_dir}/{key}.jpg'
     if os.path.exists(image_path):
@@ -26,15 +43,16 @@ def get_image_from_url(url) -> str:
         with open(image_path, 'wb') as f:
             # 写入获取到的数据
             f.write(response.content)
-        print(f"图片已下载并保存到 {image_path}")
+        print(f"{product_id} 图片已下载并保存到 {image_path}")
     else:
-        print("图片下载失败", response.status_code, response.text)
+        print(f"{product_id} 图片下载失败", url, response.status_code, response.text)
+        save_lost_images(url)
     return image_path
 
 
-def to_text_task(url: list[str], result) -> list[str]:
+def to_text_task(product_id, i, url, result):
     try:
-        fp = get_image_from_url(url)
+        fp = get_image_from_url(product_id, url)
         # 打开图像文件
         image = Image.open(fp)
     except Exception as e:
@@ -44,18 +62,23 @@ def to_text_task(url: list[str], result) -> list[str]:
         return
 
     # 进行文字识别
+    # text = pytesseract.image_to_string(image, lang='chi_sim+eng')
     text = pytesseract.image_to_string(image, lang='chi_sim')
     text = text.strip()
 
     # 打印识别结果
     print(text)
     if text:
-        result.append(text)
+        text = text.replace('\\n\\n', '\\n')
+        text = text.replace('\\n', '\n')
+        result.append((i, text))
 
 
-def to_text(images: list[str]) -> list[str]:
+def to_text(product_id, images: list[str]) -> list[str]:
     result = []
-    threads = [threading.Thread(target=to_text_task, args=(image, result)) for image in images]
+    # 并发进行ocr识别提取文本，为了保持顺序，需要把图片index传入
+    threads = [threading.Thread(target=to_text_task, args=(product_id, i, image, result)) for i, image in
+               enumerate(images)]
     for thread in threads:
         thread.start()
 
@@ -63,4 +86,5 @@ def to_text(images: list[str]) -> list[str]:
         thread.join()
 
     print('====>result', result)
-    return result
+    result.sort(key=lambda x: x[0])
+    return [txt for i, txt in result]

@@ -76,7 +76,7 @@ def get_detail_images(product_id):
     file = f'{product.base_items_dir}/{product_id}_desc.json'
     if not os.path.exists(file):
         return ''
-    result = set()
+    result = []
     print('Start parse desc images for:', product_id)
     with open(file, encoding='utf8') as f:
         f_str = f.read()
@@ -98,9 +98,9 @@ def get_detail_images(product_id):
                 """
 
                 for url in urls1:
-                    result.add(url)
+                    result.append(url)
                 for url in urls2:
-                    result.add(url)
+                    result.append(url)
 
             for k, v in componentData.items():
                 print('========>kv', k, v)
@@ -110,14 +110,18 @@ def get_detail_images(product_id):
                 if not pic.startswith('http'):
                     pic = f'https:{pic}'
                 if pic:
-                    result.add(pic)
+                    result.append(pic)
 
         if 'wdescContent' in data['data']:
             for page in data['data']['wdescContent']['pages']:
                 url = page.split('>')[1].split('<')[0]
-                result.add(url)
+                result.append(url)
 
     print('>>>>>> desc images:', product_id, result)
+    # 包含recommend_的图片都是无效的图片，需要过滤掉
+    result = filter(lambda t: 'recommend_' not in t, result)
+    result = filter(lambda t: 'recommendation_' not in t, result)
+    result = filter(lambda t: len(t) > 8, result)
     return list(result)
 
 
@@ -226,6 +230,8 @@ def run():
     i = 0
     for json_file in Path('./out/data').rglob('*.json'):
         i += 1
+        # if i > 2:
+        #     break
         print(f'[{i}]=====> start parse: {json_file}')
         with open(json_file, 'r', encoding='utf-8') as f:
             data = json.load(f)['data']
@@ -288,7 +294,7 @@ def run():
             detail_images = get_detail_images(item_id)
 
             # Image text
-            image_text = ocr.to_text(detail_images)
+            image_text = ocr.to_text(item_id, detail_images)
 
             products.append([shopId, shopName, origin_price, extra_price,
                              item_id, title, product_link,
